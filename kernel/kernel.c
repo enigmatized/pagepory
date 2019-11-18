@@ -17,16 +17,17 @@ void kernel_main() {
 
     _cscreen();
 
-	initialise_paging();  	
+	
 
     _prints("Type something, it will go through the kernel\n"
         "Type END to halt the CPU or PAGE to request a kmalloc()\n> ");
 	_prints("Page init starts here");
-  	
+
+  	initialise_paging();  	
     _prints("Hello, Page init end here\n");
 
-    uint32_t *ptr = (uint32_t*)0xA0000000;
-    uint32_t do_page_fault = *ptr;
+    //uint32_t *ptr = (uint32_t*)0xA0000000;
+    //uint32_t do_page_fault = *ptr;
 
 
 }

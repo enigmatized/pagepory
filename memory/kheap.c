@@ -35,7 +35,7 @@ uint32_t kmalloc_a(uint32_t sz)
     return kmalloc_int(sz, 1, 0);
 }
 
-uint32_t kmalloc_p(uint32_t sz, u32int *phys)
+uint32_t kmalloc_p(uint32_t sz, uint32_t *phys)
 {
     return kmalloc_int(sz, 0, phys);
 }

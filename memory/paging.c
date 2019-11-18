@@ -1,5 +1,8 @@
 #include "paging.h"
 #include "kheap.h"
+#include "../libc/common.h"
+#include "../libc/string.h"
+#include "../drivers/cscreen.h"
 
 // The kernel's page directory
 page_directory_t *kernel_directory=0;
@@ -19,7 +22,7 @@ extern uint32_t placement_address;
 #define OFFSET_FROM_BIT(a) (a%(8*4))
 
 // Static function to set a bit in the frames bitset
-static void set_frame(u32int frame_addr)
+static void set_frame(uint32_t frame_addr)
 {
     uint32_t frame = frame_addr/0x1000;
     uint32_t idx = INDEX_FROM_BIT(frame);
@@ -28,7 +31,7 @@ static void set_frame(u32int frame_addr)
 }
 
 // Static function to clear a bit in the frames bitset
-static void clear_frame(u32int frame_addr)
+static void clear_frame(uint32_t frame_addr)
 {
     uint32_t frame = frame_addr/0x1000;
     uint32_t idx = INDEX_FROM_BIT(frame);
@@ -64,6 +67,7 @@ static uint32_t first_frame()
             }
         }
     }
+    return 0;
 }
 
 // Function to allocate a frame.
@@ -107,9 +111,12 @@ void initialise_paging()
 {
     // The size of physical memory. For the moment we 
     // assume it is 16MB big.
-    uint32_t mem_end_page = 0x1000000;
+    uint32_t mem_end_page = 0x100000;
     
     nframes = mem_end_page / 0x1000;
+    //gives number of frames
+    //bitmap for each of the frames
+    //Telling if the frame is allocated or not
     frames = (uint32_t*)kmalloc(INDEX_FROM_BIT(nframes));
     memset(frames, 0, INDEX_FROM_BIT(nframes));
     
@@ -153,13 +160,14 @@ page_t *get_page(uint32_t address, int make, page_directory_t *dir)
     // Turn the address into an index.
     address /= 0x1000;
     // Find the page table containing this address.
-    uint32_t table_idx = address / 1024;
+    uint32_t table_idx = address / 1024;//Dives by 4k
     if (dir->tables[table_idx]) // If this table is already assigned
     {
         return &dir->tables[table_idx]->pages[address%1024];
     }
     else if(make)
     {
+       
         uint32_t tmp;
         dir->tables[table_idx] = (page_table_t*)kmalloc_ap(sizeof(page_table_t), &tmp);
         dir->tablesPhysical[table_idx] = tmp | 0x7; // PRESENT, RW, US.
@@ -188,7 +196,7 @@ void page_fault(registers_t regs)
 
     // Output an error message.
     _prints("Page fault! ( ");
-    if (present) {m_prints("present ");}
+    if (present) {_prints("present ");}
     if (rw) {_prints("read-only ");}
     if (us) {_prints("user-mode ");}
     if (reserved) {_prints("reserved ");}
