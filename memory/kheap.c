@@ -6,7 +6,13 @@
 #include "kheap.h"
 
 // end is defined in the linker script.
-extern uint32_t end;
+//extern uint32_t end=0xFF1000;
+
+///G:
+uint32_t end=0xFF1000;
+//Should I manuel be setting these?
+//How do I deal with this?
+//I think this is send the file to go out of bounds
 uint32_t placement_address = (uint32_t)&end;
 
 uint32_t kmalloc_int(uint32_t sz, int align, uint32_t *phys)
@@ -26,7 +32,7 @@ uint32_t kmalloc_int(uint32_t sz, int align, uint32_t *phys)
         *phys = placement_address;
     }
     uint32_t tmp = placement_address;
-    placement_address += sz;
+    placement_address += sz;//Why is this here agian?
     return tmp;
 }
 

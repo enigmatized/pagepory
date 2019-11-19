@@ -111,7 +111,7 @@ void initialise_paging()
 {
     // The size of physical memory. For the moment we 
     // assume it is 16MB big.
-    uint32_t mem_end_page = 0x100000;
+    uint32_t mem_end_page = 0x1000;
     
     nframes = mem_end_page / 0x1000;
     //gives number of frames

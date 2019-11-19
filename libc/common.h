@@ -5,6 +5,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include "../std/stdint.h"
+#include "../drivers/cscreen.h"
+
 
 typedef          int   s32int;
 typedef unsigned short u16int;
@@ -17,6 +19,9 @@ typedef          char  s8int;
 //u8int inb(u16int port);
 //u16int inw(u16int port);
 
+//Is this used?
+//Should I eliminate this?
+//I feel like this is important, but i don't fully underdstand and am Pretty mad about
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
 #define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))
 

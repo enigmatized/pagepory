@@ -96,11 +96,11 @@ extern void panic(const char *message, const char *file, uint32_t line)
     asm volatile("cli"); // Disable interrupts.
 
     _prints("PANIC(");
-    _prints(message);
+    //_prints(message);
     _prints(") at ");
-    _prints(file);
+    //_prints((char)file);
     _prints(":");
-    _prints(line);
+    //_prints(line);
     _prints("\n");
     // Halt by going into an infinite loop.
     for(;;);
@@ -114,7 +114,7 @@ extern void panic_assert(const char *file, uint32_t line, const char *desc)
     _prints("ASSERTION-FAILED(");
     _prints(desc);
     _prints(") at ");
-    _prints(file);
+   // _prints(file);
     _prints(":");
     //monitor_write_dec(line);
     _prints("\n");

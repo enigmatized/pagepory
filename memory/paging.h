@@ -2,6 +2,8 @@
 
 #include "../cpu/isr.h"  //Using registers as defined in isr.h
 #include "../std/stdint.h"
+#include "../libc/mem.h"
+
 
 #define assert(condition) ; //then assert checks if its argument (which must have scalar type) compares equal to zero. 
 #define halt() for(;;); //looping
