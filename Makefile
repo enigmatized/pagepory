@@ -2,7 +2,13 @@ C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c libc/*.c graphics/*.c memo
 HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h graphics/*.h memory/*.h)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o} 
-
+OBJ1 = ${C_SOURCES:.c=.o} 
+#Setting up assembler files
+AS := nasm
+ASFILES := $(wildcard boot/*.asm cpu/*.asm )
+ASOBJECTS := $(ASFILES:.asm=.o)
+#Everything as an object
+OBJALL = $(ASOBJECTS) $(SOURCES_C)
 # Change this if your cross-compiler is somewhere else
 CC = gcc
 GDB = i386 gdb
@@ -10,6 +16,8 @@ GDB = i386 gdb
 # -g: Use debugging symbols in gcc
 # We add -fno-pie
 CFLAGS = -fno-pie -g -ffreestanding -Wall -Wextra -fno-exceptions -m32
+#linker
+LDFLAGS=-Tlink.ld -m elf_i386
 
 # First rule is run by default
 os-image.bin: boot/bootsect.bin kernel.bin
@@ -20,6 +28,8 @@ os-image.bin: boot/bootsect.bin kernel.bin
 kernel.bin: boot/kernel_entry.o ${OBJ}
 	ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
 
+dip.o: boot/kernel_entry.o ${OBJ}
+	ld -m elf_i386 -N -e start -o $@ -Ttext 0x1000 dip.o boot/kernel_entry.o ${OBJ}
 # Used for debugging purposes
 kernel.elf: boot/kernel_entry.o ${OBJ}
 	ld -m elf_i386 -o $@ -Ttext 0x1000 $^ 
@@ -36,6 +46,21 @@ img: os-image.bin
 bochs: img
 	bochs
 
+ultron.bin: $(OBJ1)
+	ld $(LDFLAGS) -o $@ $^
+
+tall: $(OBJALL) small
+
+bootblock: boot/kernel_entry.asm ${OBJ}
+	#$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -c kernel/kernel.c
+	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c boot/kernel_entry.asm
+	$(LD) $(LDFLAGS) -N -e start -Ttext 0x1000 -o bootblock.o boot/kernel_entry.o ${OBJ}
+	#$(OBJDUMP) -S bootblock.o > bootblock.asm
+	#$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
+	#./sign.pl bootblock
+
+small:
+	$(LD) $(LDFLAGS) -o kernel.bin $(OBJALL)
 # Open the connection to qemu and load our kernel-object file with symbols
 debug: os-image.bin kernel.elf
 	qemu-system-i386 -s -fda os-image.bin &
@@ -46,12 +71,25 @@ debug: os-image.bin kernel.elf
 %.o: %.c ${HEADERS}
 	${CC} ${CFLAGS} -c $< -o $@
 
+#this could be the problem
+#asm.o is not correct format
 %.o: %.asm
-	nasm $< -f elf -o $@
+	nasm -f elf $< -o $@
 
-%.bin: %.asm
-	nasm $< -f bin -o $@
+
+
+#%.o: %.asm
+#	nasm $< -f elf -o $@
+
+#%.bin: %.asm
+#	nasm $< -f bin -o $@
 
 clean:
 	rm -rf *.bin *.dis *.o os-image.bin *.elf *.img
 	rm -rf kernel/*.o boot/*.bin drivers/*.o boot/*.o cpu/*.o libc/*.o graphics/*.o memory/*.o
+
+all: $(OBJ1) link
+
+link:
+	ld $(LDFLAGS) -o kernell $(OBJ1)
+

@@ -1,4 +1,5 @@
 ; Defined in isr.c
+global loader
 [extern isr_handler]
 [extern irq_handler]
 

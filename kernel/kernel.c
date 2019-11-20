@@ -7,7 +7,7 @@
 #include "../memory/kheap.h"
 #include "../memory/paging.h"
 
-void kernel_main() {
+void main() {
     isr_install();
     irq_install();
 	//non maskable exception
@@ -26,7 +26,7 @@ void kernel_main() {
   		
     _prints("Hello, Page init end here\n");
 	_prints("Page init starts here");
-    initialise_paging();  
+   // initialise_paging();  
    //uint32_t *ptr = (uint32_t*)0xA0000000;
    // uint32_t do_page_fault = *ptr;
 
